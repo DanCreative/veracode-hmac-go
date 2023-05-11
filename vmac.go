@@ -1,4 +1,4 @@
-package hmac
+package vmac
 
 import (
 	"crypto/hmac"
@@ -51,6 +51,7 @@ func calculateSignature(key, nonce, timestamp, data []byte) []byte {
 	return hmac256(data, signingKey)
 }
 
+// Returns the value for the Authorization header that must be added to requests
 func CalculateAuthorizationHeader(url *url.URL, httpMethod, apiKeyID, apiKeySecret string) (string, error) {
 	apiKeyID = removeRegion(apiKeyID)
 	apiKeySecret = removeRegion(apiKeySecret)
