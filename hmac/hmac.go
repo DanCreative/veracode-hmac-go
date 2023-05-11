@@ -4,6 +4,10 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,11 +19,11 @@ const (
 	veracodeHMACSHA256           = "VERACODE-HMAC-SHA-256"
 )
 
-func CurrentTimestamp() int64 {
+func currentTimestamp() int64 {
 	return time.Now().UnixMilli()
 }
 
-func GenerateNonce(size int) ([]byte, error) {
+func generateNonce(size int) ([]byte, error) {
 	nonce := make([]byte, size)
 	_, err := rand.Read(nonce)
 
@@ -45,4 +49,26 @@ func calculateSignature(key, nonce, timestamp, data []byte) []byte {
 	encryptedTimestamp := hmac256(timestamp, encryptedNonce)
 	signingKey := hmac256([]byte(veracodeRequestVersionString), encryptedTimestamp)
 	return hmac256(data, signingKey)
+}
+
+func CalculateAuthorizationHeader(url *url.URL, httpMethod, apiKeyID, apiKeySecret string) (string, error) {
+	apiKeyID = removeRegion(apiKeyID)
+	apiKeySecret = removeRegion(apiKeySecret)
+	nonce, err := generateNonce(16)
+
+	if err != nil {
+		return "", err
+	}
+
+	secret, err := hex.DecodeString(apiKeySecret)
+
+	if err != nil {
+		return "", err
+	}
+
+	timestamp := strconv.FormatInt(currentTimestamp(), 10)
+	data := fmt.Sprintf(dataFormat, apiKeyID, url.Hostname(), url.RequestURI(), httpMethod)
+	dataSignature := calculateSignature(secret, nonce, []byte(timestamp), []byte(data))
+
+	return fmt.Sprintf(headerFormat, veracodeHMACSHA256, apiKeyID, timestamp, nonce, dataSignature), nil
 }
