@@ -1,4 +1,9 @@
 # Veracode HMAC Authentication fo GO
+
+> [!IMPORTANT]
+> This package has moved into [DanCreative/veracode-go](https://github.com/DanCreative/veracode-go).
+
+
 This project is a Go version of the Veracode API Signing library provided in the [Veracode Documentation](https://docs.veracode.com/r/c_hmac_signing_example_python). This is an updated version of someone else's project([antfie](https://github.com/antfie/veracode-go-hmac-authentication)), that caters for changes that Veracode have made more recently.
 
 ## Installation
